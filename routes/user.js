@@ -7,8 +7,6 @@ const { celebrate, Joi, Segments, errors } = require("celebrate");
 
 const User = require("../models/User");
 
-const app = express();
-
 dotenv.config();
 const router = express.Router();
 
@@ -49,10 +47,31 @@ router.post(
   // check form validation
   celebrate({
     [Segments.BODY]: Joi.object().keys({
-      email: Joi.string().email().required(),
-      password: Joi.string().min(7).max(30).required(),
-      confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
-      userName: Joi.string().min(7).max(30).required(),
+      email: Joi.string().email().required().messages({
+        "string.base": "Email should be a type of string",
+        "string.empty": "Email could not be empty",
+        "any.required": "Email is a required field",
+      }),
+      password: Joi.string().min(7).max(30).required().messages({
+        "string.base": "Password should be a type of string",
+        "string.empty": "Password could not be empty",
+        "string.min": "Password should have at least 7 characters",
+        "string.max": "Password should have at most 30 characters",
+        "any.required": "Password is a required field",
+      }),
+      confirmPassword: Joi.any()
+        .valid(Joi.ref("password"))
+        .required()
+        .messages({
+          "any.only": "Password does not match",
+        }),
+      userName: Joi.string().min(7).max(30).required().messages({
+        "string.base": "User name should be a type of string",
+        "string.empty": "User name could not be empty",
+        "string.min": "User name should have at least 7 characters",
+        "string.max": "User name should have at most 30 characters",
+        "any.required": "User name is a required field",
+      }),
     }),
   }),
   async (req, res) => {
