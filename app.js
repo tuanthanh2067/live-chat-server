@@ -6,7 +6,7 @@ const { ExtractJwt, Strategy } = require("passport-jwt");
 const dotenv = require("dotenv");
 
 const User = require("./models/User");
-const userRoutes = require("./routes/user");
+const userRoutes = require("./routes/auth");
 
 dotenv.config();
 
