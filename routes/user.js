@@ -82,6 +82,12 @@ router.post(
         return res.status(400).json({ errors: "Email has been registered" });
       }
 
+      user = await User.findOne({ userName: req.body.userName });
+
+      if (user) {
+        return res.status(400).json({ errors: "User name has been taken" });
+      }
+
       const password = await bcrypt.hash(req.body.password, 10);
 
       const newUser = new User({
