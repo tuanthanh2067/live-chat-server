@@ -7,6 +7,8 @@ const mongoose = require("mongoose");
 const app = require("./app");
 const httpServer = createServer(app);
 
+const PORT = process.env.PORT || 5000;
+
 // const wsServerOptions = {
 //   cors: {
 //     origin: "*",
@@ -23,7 +25,7 @@ mongoose
   })
   .then(() => {
     // listen on port 5000
-    httpServer.listen(5000);
+    httpServer.listen(PORT);
   })
   .catch((err) => {
     console.log("unable to start the server" + err);
