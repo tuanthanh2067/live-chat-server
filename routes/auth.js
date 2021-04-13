@@ -10,10 +10,11 @@ const User = require("../models/User");
 dotenv.config();
 const router = express.Router();
 
-function createToken(id, username) {
+function createToken(id, username, role) {
   const payload = {
-    id: id,
+    userId: id,
     userName: username,
+    role: role,
   };
   const secret = process.env.JWT_SECRET;
   const options = { expiresIn: process.env.EXPIRE_IN || "3d" };
@@ -32,7 +33,7 @@ router.post("/login", async (req, res) => {
 
     if (isMatch === true) {
       return res.status(200).json({
-        token: createToken(user.id, user.name),
+        token: createToken(user.userId, user.userName, user.role),
       });
     } else {
       return res.status(400).json({ errors: "Invalid Credentials" });
@@ -94,7 +95,7 @@ router.post(
         email: req.body.email,
         password: password,
         userName: req.body.userName,
-        id: uniqid(),
+        userId: uniqid(),
       });
 
       await newUser.save();

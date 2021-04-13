@@ -1,12 +1,13 @@
 const express = require("express");
 const cors = require("cors");
-const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const { ExtractJwt, Strategy } = require("passport-jwt");
 const dotenv = require("dotenv");
 
 const User = require("./models/User");
-const userRoutes = require("./routes/auth");
+
+const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/users");
 
 dotenv.config();
 
@@ -15,12 +16,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(passport.initialize());
-
-app.use("/auth", userRoutes);
-
-app.get("/", (req, res) => {
-  res.send("Api server's working");
-});
 
 passport.use(
   new Strategy(
@@ -34,7 +29,7 @@ passport.use(
       }
       let user;
       try {
-        user = await User.findById(payload.id).exec();
+        user = await User.findOne({ userId: payload.userId }).exec();
       } catch (err) {
         console.log(err);
         return done(null, false);
@@ -47,5 +42,12 @@ passport.use(
     }
   )
 );
+
+app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
+
+app.get("/", (req, res) => {
+  res.send("Api server's working");
+});
 
 module.exports = app;

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  id: {
+  userId: {
     type: String,
     unique: true,
   },
@@ -13,6 +13,14 @@ const userSchema = new mongoose.Schema({
   userName: {
     type: String,
     unique: true,
+  },
+  role: {
+    type: String,
+    default: "user",
+  },
+  dateCreated: {
+    type: Date,
+    default: Date.now(),
   },
 });
 
