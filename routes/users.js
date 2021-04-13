@@ -1,5 +1,4 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const passport = require("passport");
 
@@ -17,7 +16,13 @@ router.get(
       if (!user) {
         return res.status(400).json({ errors: "Can not find the user" });
       }
-      return res.status(200).json(user);
+
+      return res.status(200).json({
+        role: user.role,
+        dateCreated: user.dateCreated,
+        userName: user.userName,
+        userId: user.userId,
+      });
     } catch (err) {
       console.log(err);
       return res.status(500).json({ error: err.code });
