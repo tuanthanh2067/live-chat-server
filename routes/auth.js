@@ -104,6 +104,7 @@ router.post(
         message: "Sign up successfully",
       });
     } catch (err) {
+      console.log(err);
       return res.status(404).json({ errors: err.message });
     }
   }

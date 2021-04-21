@@ -25,8 +25,8 @@ router.post(
       }),
       max: Joi.number().integer().min(1).max(300).messages({
         "number.base": "Maximum members field must be a number",
-        "number.min": "It must be greater than 0",
-        "number.max": "It must be smaller than 300",
+        "number.min": "Members must be greater than 0",
+        "number.max": "Members must be smaller than 300",
       }),
       visibility: Joi.string().valid("public", "private").required().messages({
         "string.base": "Visibility should be a string",
@@ -57,9 +57,7 @@ router.post(
 
       await newRoom.save();
 
-      return res.status(200).json({
-        message: "Created successfully",
-      });
+      return res.status(200).json(newRoom);
     } catch (err) {
       console.log(err);
       return res.status(404).json({ errors: err.code });

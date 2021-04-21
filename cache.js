@@ -1,7 +1,7 @@
 const LRU = require("lru-cache");
 
 const oneDay = 1000 * 60 * 60 * 24;
-const cache = new LRU({ max: 350, maxAge: oneDay });
+const cache = new LRU({ max: 1000, maxAge: oneDay });
 
 let id = 1;
 

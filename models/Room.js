@@ -13,6 +13,7 @@ const roomSchema = new mongoose.Schema({
   },
   maxNumbers: {
     type: Number,
+    default: 300,
   },
   visibility: {
     type: String,
@@ -22,6 +23,10 @@ const roomSchema = new mongoose.Schema({
   },
   members: {
     type: [String],
+  },
+  likeAmount: {
+    type: Number,
+    default: 0,
   },
   dateCreated: {
     type: Date,
