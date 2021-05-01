@@ -2,7 +2,7 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 
-const { addMessage, messages } = require("./cache");
+const { createRoom, addMessage, messages } = require("./cache");
 const {
   addUser,
   getUser,
@@ -12,6 +12,7 @@ const {
 } = require("./users");
 
 const app = require("./app");
+const { create } = require("./models/User");
 const httpServer = createServer(app);
 
 const PORT = process.env.PORT || 5000;
@@ -44,6 +45,7 @@ mongoose.set("useCreateIndex", true);
 
 io.on("connection", (socket) => {
   socket.userId = "";
+
   socket.on("switchRoom", ({ id, name, newRoom }) => {
     socket.userId = id;
     let user = getUser(socket.userId);
@@ -63,6 +65,7 @@ io.on("connection", (socket) => {
     }
 
     socket.join(newRoom);
+    socket.currentRoom = newRoom;
 
     io.in(newRoom).emit("notification", {
       title: `${user.name} just entered the room`,
@@ -72,7 +75,7 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", ({ chat }) => {
     const user = getUser(socket.userId);
 
-    addMessage(user.name, chat);
+    addMessage(user.name, chat, user.room);
 
     io.in(user.room).emit("message", { name: user.name, text: chat });
   });
@@ -94,7 +97,7 @@ io.on("connection", (socket) => {
     io.in(roomId).emit("count", { clients: getTotalClientOfARoomById(roomId) });
   });
 
-  socket.emit("init", {
-    messages: messages(),
+  socket.on("init", ({ roomId }) => {
+    socket.to(roomId).emit("init", { messages: messages(socket.roomId) });
   });
 });

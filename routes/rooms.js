@@ -6,6 +6,8 @@ const { celebrate, Joi, Segments, errors } = require("celebrate");
 const Room = require("../models/Room");
 const User = require("../models/User");
 
+const { createRoom } = require("../cache");
+
 const router = express.Router();
 
 router.post(
@@ -57,6 +59,9 @@ router.post(
 
       await newRoom.save();
 
+      // create new room in cache
+      createRoom(newRoom.roomId);
+
       return res.status(200).json(newRoom);
     } catch (err) {
       console.log(err);
@@ -64,6 +69,15 @@ router.post(
     }
   }
 );
+
+router.get("/get-popular", async (req, res) => {
+  const rooms = await Room.find({}).sort({ likeAmount: 1 }).limit(20);
+  if (!rooms) {
+    return res.json({ message: "There is currently no rooms" });
+  }
+
+  return res.status(200).json(rooms);
+});
 
 router.use(errors());
 
