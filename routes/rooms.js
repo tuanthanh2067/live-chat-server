@@ -2,11 +2,12 @@ const express = require("express");
 const passport = require("passport");
 const uniqid = require("uniqid");
 const { celebrate, Joi, Segments, errors } = require("celebrate");
+const cloudinary = require("cloudinary").v2;
 
 const Room = require("../models/Room");
 const User = require("../models/User");
 
-const { createRoom } = require("../cache");
+// const { createRoom } = require("../cache");
 
 const router = express.Router();
 
@@ -55,28 +56,47 @@ router.post(
         visibility: req.body.visibility,
         admins: [user.userId],
         members: [user.userId],
+        image:
+          "https://res.cloudinary.com/dsqq6qdlf/image/upload/v1619993702/gossip-app/theme-park_dlnk0a.jpg",
       });
 
       await newRoom.save();
 
       // create new room in cache
-      createRoom(newRoom.roomId);
+      // createRoom(newRoom.roomId);
 
       return res.status(200).json(newRoom);
     } catch (err) {
       console.log(err);
-      return res.status(404).json({ errors: err.code });
+      return res
+        .status(404)
+        .json({ errors: "Problem creating a room, please try again!" });
     }
   }
 );
 
 router.get("/get-popular", async (req, res) => {
-  const rooms = await Room.find({}).sort({ likeAmount: 1 }).limit(20);
-  if (!rooms) {
-    return res.json({ message: "There is currently no rooms" });
+  try {
+    const rooms = await Room.find({}).sort({ likeAmount: -1 }).limit(20);
+    if (!rooms) {
+      return res.status(400).json({ errors: "There is currently no rooms" });
+    }
+    return res.status(200).json(rooms);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ errors: "Problem getting popular rooms" });
   }
+});
 
-  return res.status(200).json(rooms);
+router.post("/upload-room-image", async (req, res) => {
+  try {
+    cloudinary.uploader.upload(req.files[0], function (error, result) {
+      console.log(result, error);
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ errors: "Problem uploading image" });
+  }
 });
 
 router.use(errors());

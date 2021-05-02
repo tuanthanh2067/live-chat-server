@@ -1,13 +1,15 @@
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
+const cloudinary = require("cloudinary").v2;
+const dotenv = require("dotenv");
+dotenv.config();
 
 const { createRoom, addMessage, messages } = require("./cache");
 const {
   addUser,
   getUser,
   deleteUser,
-  getUsersOfARoom,
   getTotalClientOfARoomById,
 } = require("./users");
 
@@ -16,6 +18,12 @@ const { create } = require("./models/User");
 const httpServer = createServer(app);
 
 const PORT = process.env.PORT || 5000;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const wsServerOptions = {
   cors: {
