@@ -55,29 +55,23 @@ mongoose.set("useCreateIndex", true);
 io.on("connection", (socket) => {
   socket.userId = "";
 
-  socket.on("switchRoom", ({ id, name, newRoom }) => {
+  socket.on("joinRoom", ({ id, name, newRoom }) => {
     socket.userId = id;
-    let user = getUser(socket.userId);
 
-    if (user) {
-      // already in a room
-      // leave the room
-      socket.leave(user.room);
-
-      socket.to(user.room).emit("notification", {
-        title: `${user.name} just left the room`,
-      });
-
-      user.room = newRoom;
-    } else {
+    let user = getUser(id);
+    if (!user) {
       user = addUser(socket.userId, name, newRoom);
     }
 
+    user.room = newRoom;
     socket.join(newRoom);
-    socket.currentRoom = newRoom;
 
     io.in(newRoom).emit("notification", {
       title: `${user.name} just entered the room`,
+    });
+
+    io.in(newRoom).emit("count", {
+      clients: getTotalClientOfARoomById(newRoom),
     });
   });
 
@@ -89,14 +83,30 @@ io.on("connection", (socket) => {
     io.in(user.room).emit("message", { name: user.name, text: chat });
   });
 
+  socket.on("leaveRoom", () => {
+    let user = getUser(socket.userId);
+
+    socket.to(user.room).emit("notification", {
+      title: `${user.name} just left the room`,
+    });
+
+    socket.to(user.room).emit("count", {
+      clients: getTotalClientOfARoomById(user.room) - 1,
+    });
+
+    user.room = "";
+
+    socket.leave(user.room);
+  });
+
   socket.on("disconnect", () => {
     const user = deleteUser(socket.userId);
 
     if (user) {
       socket.to(user.room).emit("notification", {
-        title: `${user.name} just left the room`,
+        title: `${user.name} just disconnected from the server`,
       });
-      io.in(user.room).emit("count", {
+      socket.to(user.room).emit("count", {
         clients: getTotalClientOfARoomById(user.room),
       });
     }

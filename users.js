@@ -1,13 +1,7 @@
 const users = [];
 
 const addUser = (id, name, room) => {
-  const index = users.findIndex((user) => user.id === id);
-  let user;
-  if (index !== -1) {
-    users[index].room = room; // if user is already in a room -> just change their room
-  } else {
-    user = { id, name, room }; // new a user
-  }
+  user = { id, name, room }; // new a user
   users.push(user);
 
   return user;
