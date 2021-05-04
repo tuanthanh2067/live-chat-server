@@ -99,6 +99,38 @@ router.post("/upload-room-image", async (req, res) => {
   }
 });
 
+router.put("/update/:roomId", async (req, res) => {
+  const roomId = req.params.roomId;
+  const userId = req.body.userId;
+
+  // check if user is new to the room by user id
+  // new -> add to the database
+  try {
+    const room = await Room.findOne({ roomId: roomId });
+
+    if (!room) {
+      return res.status(400).json({ errors: "Problem finding room" });
+    }
+
+    const user = room.members.find((member) => member === userId);
+
+    if (!user) {
+      // no user in the room yet
+      // add user to the database
+
+      await Room.updateOne({ roomId: roomId }, { $push: { members: userId } });
+      return res.status(200).json({ messages: "Updated successfully" });
+    }
+
+    return res.status(200).json({ messages: "User is already in the room" });
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(404)
+      .json({ errors: "An error has been detected, please try again!" });
+  }
+});
+
 router.use(errors());
 
 module.exports = router;

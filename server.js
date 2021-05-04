@@ -13,6 +13,8 @@ const {
   getTotalClientOfARoomById,
 } = require("./users");
 
+const Room = require("./models/Room");
+
 const app = require("./app");
 const httpServer = createServer(app);
 
@@ -106,7 +108,7 @@ io.on("connection", (socket) => {
     io.in(roomId).emit("count", { clients: getTotalClientOfARoomById(roomId) });
   });
 
-  // socket.on("init", ({ roomId }) => {
-  //   socket.to(roomId).emit("init", { messages: messages(socket.roomId) });
+  // socket.on("init", async ({ roomId, userId }) => {
+  // socket.to(roomId).emit("init", { messages: messages(socket.roomId) });
   // });
 });
