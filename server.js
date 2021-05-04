@@ -5,7 +5,7 @@ const cloudinary = require("cloudinary").v2;
 const dotenv = require("dotenv");
 dotenv.config();
 
-const { createRoom, addMessage, messages } = require("./cache");
+// const { createRoom, addMessage, messages } = require("./cache");
 const {
   addUser,
   getUser,
@@ -83,7 +83,7 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", ({ chat }) => {
     const user = getUser(socket.userId);
 
-    addMessage(user.name, chat, user.room);
+    // addMessage(user.name, chat, user.room);
 
     io.in(user.room).emit("message", { name: user.name, text: chat });
   });
@@ -105,7 +105,7 @@ io.on("connection", (socket) => {
     io.in(roomId).emit("count", { clients: getTotalClientOfARoomById(roomId) });
   });
 
-  socket.on("init", ({ roomId }) => {
-    socket.to(roomId).emit("init", { messages: messages(socket.roomId) });
-  });
+  // socket.on("init", ({ roomId }) => {
+  //   socket.to(roomId).emit("init", { messages: messages(socket.roomId) });
+  // });
 });
