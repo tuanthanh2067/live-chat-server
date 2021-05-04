@@ -14,7 +14,6 @@ const {
 } = require("./users");
 
 const app = require("./app");
-const { create } = require("./models/User");
 const httpServer = createServer(app);
 
 const PORT = process.env.PORT || 5000;
@@ -89,12 +88,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("a user disconnected");
     const user = deleteUser(socket.userId);
 
     if (user) {
       socket.to(user.room).emit("notification", {
         title: `${user.name} just left the room`,
+      });
+      io.in(user.room).emit("count", {
+        clients: getTotalClientOfARoomById(user.room),
       });
     }
 
