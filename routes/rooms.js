@@ -77,7 +77,12 @@ router.post(
 
 router.get("/get-popular", async (req, res) => {
   try {
-    const rooms = await Room.find({}).sort({ likeAmount: -1 }).limit(20);
+    const amount = req.query.amount;
+    const page = req.query.page;
+    const rooms = await Room.find({})
+      .sort({ likeAmount: -1 })
+      .limit(-amount)
+      .skip(-amount * -page);
     if (!rooms) {
       return res.status(400).json({ errors: "There is currently no rooms" });
     }

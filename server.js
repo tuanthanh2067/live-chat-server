@@ -94,9 +94,9 @@ io.on("connection", (socket) => {
       clients: getTotalClientOfARoomById(user.room) - 1,
     });
 
-    user.room = "";
-
     socket.leave(user.room);
+
+    user.room = "";
   });
 
   socket.on("disconnect", () => {
