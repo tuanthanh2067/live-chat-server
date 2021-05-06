@@ -104,7 +104,7 @@ router.post("/upload-room-image", async (req, res) => {
   }
 });
 
-router.put("/update/:roomId", async (req, res) => {
+router.put("/update/:roomId/user", async (req, res) => {
   const roomId = req.params.roomId;
   const userId = req.body.userId;
 
@@ -124,10 +124,70 @@ router.put("/update/:roomId", async (req, res) => {
       // add user to the database
 
       await Room.updateOne({ roomId: roomId }, { $push: { members: userId } });
-      return res.status(200).json({ messages: "Updated successfully" });
     }
 
-    return res.status(200).json({ messages: "User is already in the room" });
+    const isFav = room.favorites.find((member) => member === userId);
+    let isLiked = isFav ? true : false;
+
+    return res.status(200).json({
+      maxNumbers: room.maxNumbers,
+      members: room.members,
+      dateCreated: room.dateCreated,
+      roomId: room.roomId,
+      roomName: room.roomName,
+      description: room.description,
+      visibility: room.visibility,
+      image: room.image,
+      isLiked: isLiked,
+    });
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(404)
+      .json({ errors: "An error has been detected, please try again!" });
+  }
+});
+
+router.put("/update/:roomId/favorite", async (req, res) => {
+  const roomId = req.params.roomId;
+  const userId = req.body.userId;
+
+  // check if user is new to the room by user id
+  // new -> add to the database
+  try {
+    const room = await Room.findOne({ roomId: roomId });
+
+    if (!room) {
+      return res.status(400).json({ errors: "Problem finding room" });
+    }
+
+    const isFav = room.favorites.find((member) => member === userId);
+    let isLiked;
+
+    if (!isFav) {
+      isLiked = true;
+      await Room.updateOne(
+        { roomId: roomId },
+        { $push: { favorites: userId } }
+      );
+    } else {
+      isLiked = false;
+      await Room.updateOne(
+        { roomId: roomId },
+        { $pull: { favorites: userId } }
+      );
+    }
+    return res.status(200).json({
+      maxNumbers: room.maxNumbers,
+      members: room.members,
+      dateCreated: room.dateCreated,
+      roomId: room.roomId,
+      roomName: room.roomName,
+      description: room.description,
+      visibility: room.visibility,
+      image: room.image,
+      isLiked: isLiked,
+    });
   } catch (err) {
     console.log(err);
     return res

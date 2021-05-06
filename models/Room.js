@@ -24,6 +24,10 @@ const roomSchema = new mongoose.Schema({
   members: {
     type: [String],
   },
+  favorites: {
+    type: [String],
+    default: [],
+  },
   likeAmount: {
     type: Number,
     default: 0,
