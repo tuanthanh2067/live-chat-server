@@ -57,7 +57,7 @@ router.post(
         admins: [user.userId],
         members: [user.userId],
         image:
-          "https://res.cloudinary.com/dsqq6qdlf/image/upload/v1619993702/gossip-app/theme-park_dlnk0a.jpg",
+          "https://res.cloudinary.com/dsqq6qdlf/image/upload/v1619993702/gossip-app/default-room-image.jpg",
       });
 
       await newRoom.save();

@@ -22,6 +22,7 @@ router.get(
         dateCreated: user.dateCreated,
         userName: user.userName,
         userId: user.userId,
+        image: user.image,
       });
     } catch (err) {
       console.log(err);
@@ -29,5 +30,31 @@ router.get(
     }
   }
 );
+
+router.get("/active", async (req, res) => {
+  const amount = req.query.amount;
+  const page = req.query.page;
+  try {
+    const users = await User.find(
+      {},
+      { role: 1, dateCreated: 1, _id: 0, userName: 1, userId: 1, image: 1 }
+    )
+
+      .sort({ dateCreated: 1 })
+      .limit(-amount)
+      .skip(-amount * -page);
+
+    if (!users) {
+      return res
+        .status(400)
+        .json({ errors: "There is currently no gossipers" });
+    }
+
+    return res.status(200).json(users);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ errors: "Problem getting active gossipers" });
+  }
+});
 
 module.exports = router;

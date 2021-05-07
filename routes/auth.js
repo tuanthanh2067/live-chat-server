@@ -96,6 +96,8 @@ router.post(
         password: password,
         userName: req.body.userName,
         userId: uniqid(),
+        image:
+          "https://res.cloudinary.com/dsqq6qdlf/image/upload/v1620338374/gossip-app/default-user-image.jpg",
       });
 
       await newUser.save();

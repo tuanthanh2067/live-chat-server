@@ -55,12 +55,12 @@ mongoose.set("useCreateIndex", true);
 io.on("connection", (socket) => {
   socket.userId = "";
 
-  socket.on("joinRoom", ({ id, name, newRoom }) => {
+  socket.on("joinRoom", ({ id, name, newRoom, image }) => {
     socket.userId = id;
 
     let user = getUser(id);
     if (!user) {
-      user = addUser(socket.userId, name, newRoom);
+      user = addUser(socket.userId, name, newRoom, image);
     }
 
     user.room = newRoom;
@@ -80,7 +80,11 @@ io.on("connection", (socket) => {
 
     // addMessage(user.name, chat, user.room);
 
-    io.in(user.room).emit("message", { name: user.name, text: chat });
+    io.in(user.room).emit("message", {
+      name: user.name,
+      text: chat,
+      image: user.image,
+    });
   });
 
   socket.on("leaveRoom", () => {
