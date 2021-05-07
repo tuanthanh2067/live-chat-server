@@ -93,6 +93,28 @@ router.get("/get-popular", async (req, res) => {
   }
 });
 
+router.get("/search", async (req, res) => {
+  try {
+    const title = req.query.title;
+    const amount = req.query.amount;
+    const page = req.query.page;
+
+    const rooms = await Room.find({ roomName: title })
+      .sort({ likeAmount: -1 })
+      .limit(-amount)
+      .skip(-amount * -page);
+
+    if (!rooms) {
+      return res.status(400).json({ errors: "No rooms found" });
+    }
+
+    return res.status(200).json(rooms);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ errors: "Problem getting rooms" });
+  }
+});
+
 router.post("/upload-room-image", async (req, res) => {
   try {
     cloudinary.uploader.upload(req.files[0], function (error, result) {
