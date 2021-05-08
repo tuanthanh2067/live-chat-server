@@ -136,6 +136,27 @@ router.get("/search", async (req, res) => {
   }
 });
 
+router.get("/favorite", async (req, res) => {
+  try {
+    const userId = req.query.userId;
+    const amount = req.query.amount;
+    const page = req.query.page;
+
+    const rooms = await Room.find({ favorites: userId })
+      .sort({ likeAmount: -1 })
+      .limit(-amount)
+      .skip(-amount * -page);
+
+    if (!rooms) {
+      return res
+        .status(400)
+        .json({ errors: "You don't have any favorite rooms" });
+    }
+
+    return res.status(200).json(rooms);
+  } catch (err) {}
+});
+
 router.post("/upload-room-image", async (req, res) => {
   try {
     cloudinary.uploader.upload(req.files[0], function (error, result) {
