@@ -232,13 +232,13 @@ router.put("/update/:roomId/favorite", async (req, res) => {
       isLiked = true;
       await Room.updateOne(
         { roomId: roomId },
-        { $push: { favorites: userId } }
+        { $push: { favorites: userId }, $inc: { likeAmount: 1 } }
       );
     } else {
       isLiked = false;
       await Room.updateOne(
         { roomId: roomId },
-        { $pull: { favorites: userId } }
+        { $pull: { favorites: userId }, $inc: { likeAmount: -1 } }
       );
     }
     return res.status(200).json({
