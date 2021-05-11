@@ -203,6 +203,7 @@ router.put("/update/:roomId/user", async (req, res) => {
       visibility: room.visibility,
       image: room.image,
       isLiked: isLiked,
+      admins: room.admins,
     });
   } catch (err) {
     console.log(err);
@@ -251,6 +252,7 @@ router.put("/update/:roomId/favorite", async (req, res) => {
       visibility: room.visibility,
       image: room.image,
       isLiked: isLiked,
+      admins: room.admins,
     });
   } catch (err) {
     console.log(err);
