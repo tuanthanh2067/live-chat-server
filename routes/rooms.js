@@ -294,6 +294,113 @@ router.put(
   }
 );
 
+router.put(
+  "/update/:roomId/admin",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const roomId = req.params.roomId;
+      const newAdminId = req.body.userId;
+
+      const room = await Room.findOne({ roomId: roomId });
+
+      if (!room) {
+        return res.status(400).json({ errors: "Can not find the room" });
+      }
+
+      // check if new admin id exists
+      const user = await User.findOne({ userId: newAdminId });
+      if (!user) {
+        return res.status(400).json({ errors: "User id does not exist" });
+      }
+
+      // check if new admin is already an admin or not
+      if (room.admins.includes(newAdminId)) {
+        return res.status(400).json({ errors: "Already an admin" });
+      }
+
+      if (room.admins.includes(userId)) {
+        // this person is an admin
+        // so they can add admins or members
+        await Room.updateOne(
+          { roomId: roomId },
+          { $push: { admins: newAdminId } }
+        );
+
+        // if the person is not in the room yet
+        // also add them to member array
+        if (!room.members.includes(newAdminId)) {
+          await Room.updateOne(
+            { roomId: roomId },
+            { $push: { members: newAdminId } }
+          );
+        }
+
+        return res.status(200).json({ messages: "A new admin has been added" });
+      }
+      return res
+        .status(400)
+        .json({ errors: "You're not authorized to add admins" });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(404)
+        .json({ errors: "Error detected, please try again" });
+    }
+  }
+);
+
+router.put(
+  "/update/:roomId/member",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const roomId = req.params.roomId;
+      const newMemberId = req.body.userId;
+
+      const room = await Room.findOne({ roomId: roomId });
+
+      if (!room) {
+        return res.status(400).json({ errors: "Can not find the room" });
+      }
+
+      // check if new member id exists
+      const user = await User.findOne({ userId: newMemberId });
+      if (!user) {
+        return res.status(400).json({ errors: "User id does not exist" });
+      }
+
+      // check if new member is already a member or not
+      if (room.members.includes(newMemberId)) {
+        return res.status(400).json({ errors: "Already a member" });
+      }
+
+      if (room.admins.includes(userId)) {
+        // this person is an admin
+        // so they can add admins or members
+        await Room.updateOne(
+          { roomId: roomId },
+          { $push: { members: newMemberId } }
+        );
+
+        return res
+          .status(200)
+          .json({ messages: "A new member has been added" });
+      }
+      return res
+        .status(400)
+        .json({ errors: "You're not authorized to add members" });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(404)
+        .json({ errors: "Error detected, please try again" });
+    }
+  }
+);
+
 router.use(errors());
 
 module.exports = router;
