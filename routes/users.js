@@ -111,23 +111,28 @@ router.get("/get-users", async (req, res) => {
   }
 });
 
-router.post("/upload-image", singleUploadCtrl, async (req, res) => {
-  try {
-    const userId = req.query.userId;
-    if (!req.file) {
-      throw new Error("Image is not presented!");
-    }
-    const file64 = formatBufferTo64(req.file);
+router.post(
+  "/upload-image",
+  singleUploadCtrl,
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      if (!req.file) {
+        return res.status(400).json({ errors: "Incorrect image type" });
+      }
+      const file64 = formatBufferTo64(req.file);
 
-    const uploadResult = await cloudinaryUpload(file64.content);
-    await User.updateOne(
-      { userId: userId },
-      { image: uploadResult.secure_url }
-    );
-    return res.status(200).json({ messages: "Upload successfully" });
-  } catch (e) {
-    return res.status(422).send({ message: e.message });
+      const uploadResult = await cloudinaryUpload(file64.content);
+      await User.updateOne(
+        { userId: userId },
+        { image: uploadResult.secure_url }
+      );
+      return res.status(200).json({ messages: "Upload successfully" });
+    } catch (e) {
+      return res.status(422).send({ errors: e.message });
+    }
   }
-});
+);
 
 module.exports = router;

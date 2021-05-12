@@ -93,26 +93,30 @@ router.get("/get-popular", async (req, res) => {
   }
 });
 
-router.get("/your-rooms", async (req, res) => {
-  try {
-    const userId = req.query.userId;
-    const amount = req.query.amount;
-    const page = req.query.page;
+router.get(
+  "/your-rooms",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const amount = req.query.amount;
+      const page = req.query.page;
 
-    const rooms = await Room.find({ admins: userId })
-      .sort({ likeAmount: -1 })
-      .limit(-amount)
-      .skip(-amount * -page);
+      const rooms = await Room.find({ admins: userId })
+        .sort({ likeAmount: -1 })
+        .limit(-amount)
+        .skip(-amount * -page);
 
-    if (!rooms) {
-      return res.status(400).json({ errors: "You don't have any rooms yet" });
+      if (!rooms) {
+        return res.status(400).json({ errors: "You don't have any rooms yet" });
+      }
+      return res.status(200).json(rooms);
+    } catch (err) {
+      console.log(err);
+      return res.status(404).json({ errors: "Problem getting your rooms" });
     }
-    return res.status(200).json(rooms);
-  } catch (err) {
-    console.log(err);
-    return res.status(404).json({ errors: "Problem getting your rooms" });
   }
-});
+);
 
 router.get("/search", async (req, res) => {
   try {
@@ -136,29 +140,33 @@ router.get("/search", async (req, res) => {
   }
 });
 
-router.get("/favorite", async (req, res) => {
-  try {
-    const userId = req.query.userId;
-    const amount = req.query.amount;
-    const page = req.query.page;
+router.get(
+  "/favorite",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const amount = req.query.amount;
+      const page = req.query.page;
 
-    const rooms = await Room.find({ favorites: userId })
-      .sort({ likeAmount: -1 })
-      .limit(-amount)
-      .skip(-amount * -page);
+      const rooms = await Room.find({ favorites: userId })
+        .sort({ likeAmount: -1 })
+        .limit(-amount)
+        .skip(-amount * -page);
 
-    if (!rooms) {
-      return res
-        .status(400)
-        .json({ errors: "You don't have any favorite rooms" });
+      if (!rooms) {
+        return res
+          .status(400)
+          .json({ errors: "You don't have any favorite rooms" });
+      }
+
+      return res.status(200).json(rooms);
+    } catch (err) {
+      console.log(err);
+      return res.status(404).json({ errors: "Problem getting favorite rooms" });
     }
-
-    return res.status(200).json(rooms);
-  } catch (err) {
-    console.log(err);
-    return res.status(404).json({ errors: "Problem getting favorite rooms" });
   }
-});
+);
 
 router.get("/:id", async (req, res) => {
   try {
@@ -187,93 +195,104 @@ router.post("/upload-room-image", async (req, res) => {
   }
 });
 
-router.put("/update/:roomId/user", async (req, res) => {
-  const roomId = req.params.roomId;
-  const userId = req.body.userId;
+router.put(
+  "/update/:roomId/user",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const roomId = req.params.roomId;
+    const userId = req.user.userId;
 
-  // check if user is new to the room by user id
-  // new -> add to the database
-  try {
-    const room = await Room.findOne({ roomId: roomId });
+    // check if user is new to the room by user id
+    // new -> add to the database
+    try {
+      const room = await Room.findOne({ roomId: roomId });
 
-    if (!room) {
-      return res.status(400).json({ errors: "Problem finding room" });
+      if (!room) {
+        return res.status(400).json({ errors: "Problem finding room" });
+      }
+
+      const user = room.members.find((member) => member === userId);
+
+      if (!user) {
+        // no user in the room yet
+        // add user to the database
+
+        await Room.updateOne(
+          { roomId: roomId },
+          { $push: { members: userId } }
+        );
+      }
+
+      const isFav = room.favorites.find((member) => member === userId);
+      let isLiked = isFav ? true : false;
+
+      return res.status(200).json({
+        maxNumbers: room.maxNumbers,
+        roomId: room.roomId,
+        roomName: room.roomName,
+        description: room.description,
+        visibility: room.visibility,
+        image: room.image,
+        isLiked: isLiked,
+      });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(404)
+        .json({ errors: "An error has been detected, please try again!" });
     }
-
-    const user = room.members.find((member) => member === userId);
-
-    if (!user) {
-      // no user in the room yet
-      // add user to the database
-
-      await Room.updateOne({ roomId: roomId }, { $push: { members: userId } });
-    }
-
-    const isFav = room.favorites.find((member) => member === userId);
-    let isLiked = isFav ? true : false;
-
-    return res.status(200).json({
-      maxNumbers: room.maxNumbers,
-      roomId: room.roomId,
-      roomName: room.roomName,
-      description: room.description,
-      visibility: room.visibility,
-      image: room.image,
-      isLiked: isLiked,
-    });
-  } catch (err) {
-    console.log(err);
-    return res
-      .status(404)
-      .json({ errors: "An error has been detected, please try again!" });
   }
-});
+);
 
-router.put("/update/:roomId/favorite", async (req, res) => {
-  const roomId = req.params.roomId;
-  const userId = req.body.userId;
+router.put(
+  "/update/:roomId/favorite",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const roomId = req.params.roomId;
+    const userId = req.user.userId;
 
-  // check if user is new to the room by user id
-  // new -> add to the database
-  try {
-    const room = await Room.findOne({ roomId: roomId });
+    // check if user is new to the room by user id
+    // new -> add to the database
+    try {
+      const room = await Room.findOne({ roomId: roomId });
 
-    if (!room) {
-      return res.status(400).json({ errors: "Problem finding room" });
+      if (!room) {
+        return res.status(400).json({ errors: "Problem finding room" });
+      }
+
+      const isFav = room.favorites.find((member) => member === userId);
+      let isLiked;
+
+      if (!isFav) {
+        isLiked = true;
+        await Room.updateOne(
+          { roomId: roomId },
+          { $push: { favorites: userId }, $inc: { likeAmount: 1 } }
+        );
+      } else {
+        isLiked = false;
+        await Room.updateOne(
+          { roomId: roomId },
+          { $pull: { favorites: userId }, $inc: { likeAmount: -1 } }
+        );
+      }
+      return res.status(200).json({
+        maxNumbers: room.maxNumbers,
+        roomId: room.roomId,
+        roomName: room.roomName,
+        description: room.description,
+        visibility: room.visibility,
+        image: room.image,
+        isLiked: isLiked,
+      });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(404)
+        .json({ errors: "An error has been detected, please try again!" });
     }
-
-    const isFav = room.favorites.find((member) => member === userId);
-    let isLiked;
-
-    if (!isFav) {
-      isLiked = true;
-      await Room.updateOne(
-        { roomId: roomId },
-        { $push: { favorites: userId }, $inc: { likeAmount: 1 } }
-      );
-    } else {
-      isLiked = false;
-      await Room.updateOne(
-        { roomId: roomId },
-        { $pull: { favorites: userId }, $inc: { likeAmount: -1 } }
-      );
-    }
-    return res.status(200).json({
-      maxNumbers: room.maxNumbers,
-      roomId: room.roomId,
-      roomName: room.roomName,
-      description: room.description,
-      visibility: room.visibility,
-      image: room.image,
-      isLiked: isLiked,
-    });
-  } catch (err) {
-    console.log(err);
-    return res
-      .status(404)
-      .json({ errors: "An error has been detected, please try again!" });
   }
-});
+);
 
 router.use(errors());
 
