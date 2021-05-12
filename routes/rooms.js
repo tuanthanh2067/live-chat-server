@@ -223,18 +223,35 @@ router.put(
         );
       }
 
+      return res.status(200).json({
+        messages: "Update successfully",
+      });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(404)
+        .json({ errors: "An error has been detected, please try again!" });
+    }
+  }
+);
+
+router.get(
+  "/:roomId/isLiked",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const roomId = req.params.roomId;
+      const userId = req.user.userId;
+      const room = await Room.findOne({ roomId: roomId });
+
+      if (!room) {
+        return res.status(400).json({ errors: "Problem finding room" });
+      }
+
       const isFav = room.favorites.find((member) => member === userId);
       let isLiked = isFav ? true : false;
 
-      return res.status(200).json({
-        maxNumbers: room.maxNumbers,
-        roomId: room.roomId,
-        roomName: room.roomName,
-        description: room.description,
-        visibility: room.visibility,
-        image: room.image,
-        isLiked: isLiked,
-      });
+      return res.json(isLiked);
     } catch (err) {
       console.log(err);
       return res
@@ -276,15 +293,7 @@ router.put(
           { $pull: { favorites: userId }, $inc: { likeAmount: -1 } }
         );
       }
-      return res.status(200).json({
-        maxNumbers: room.maxNumbers,
-        roomId: room.roomId,
-        roomName: room.roomName,
-        description: room.description,
-        visibility: room.visibility,
-        image: room.image,
-        isLiked: isLiked,
-      });
+      return res.status(200).json(isLiked);
     } catch (err) {
       console.log(err);
       return res
