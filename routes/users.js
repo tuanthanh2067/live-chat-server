@@ -97,6 +97,20 @@ router.get("/active", async (req, res) => {
   }
 });
 
+router.get("/get-users", async (req, res) => {
+  try {
+    const users = req.query.users.split(",");
+    if (users.length === 0) {
+      return res.status(400).json({ errors: "There is no users found" });
+    }
+    const results = await User.find({ userId: { $in: users } });
+    return res.status(200).json(results);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ errors: "Problem getting users" });
+  }
+});
+
 router.post("/upload-image", singleUploadCtrl, async (req, res) => {
   try {
     const userId = req.query.userId;

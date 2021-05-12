@@ -154,7 +154,26 @@ router.get("/favorite", async (req, res) => {
     }
 
     return res.status(200).json(rooms);
-  } catch (err) {}
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ errors: "Problem getting favorite rooms" });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const room = await Room.findOne({ roomId: id });
+
+    if (!room) {
+      return res.status(400).json({ errors: `Can not find the room id ${id}` });
+    }
+
+    return res.status(200).json(room);
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ errors: "Problem getting the room" });
+  }
 });
 
 router.post("/upload-room-image", async (req, res) => {
@@ -195,15 +214,12 @@ router.put("/update/:roomId/user", async (req, res) => {
 
     return res.status(200).json({
       maxNumbers: room.maxNumbers,
-      members: room.members,
-      dateCreated: room.dateCreated,
       roomId: room.roomId,
       roomName: room.roomName,
       description: room.description,
       visibility: room.visibility,
       image: room.image,
       isLiked: isLiked,
-      admins: room.admins,
     });
   } catch (err) {
     console.log(err);
@@ -244,15 +260,12 @@ router.put("/update/:roomId/favorite", async (req, res) => {
     }
     return res.status(200).json({
       maxNumbers: room.maxNumbers,
-      members: room.members,
-      dateCreated: room.dateCreated,
       roomId: room.roomId,
       roomName: room.roomName,
       description: room.description,
       visibility: room.visibility,
       image: room.image,
       isLiked: isLiked,
-      admins: room.admins,
     });
   } catch (err) {
     console.log(err);
