@@ -18,6 +18,9 @@ const roomSchema = new mongoose.Schema({
   visibility: {
     type: String,
   },
+  creator: {
+    type: String,
+  },
   admins: {
     type: [String],
   },

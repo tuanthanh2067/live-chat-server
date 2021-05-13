@@ -56,6 +56,7 @@ router.post(
         visibility: req.body.visibility,
         admins: [user.userId],
         members: [user.userId],
+        creator: user.userId,
         image:
           "https://res.cloudinary.com/dsqq6qdlf/image/upload/v1619993702/gossip-app/default-room-image.jpg",
       });
@@ -101,6 +102,11 @@ router.get(
       const userId = req.user.userId;
       const amount = req.query.amount;
       const page = req.query.page;
+
+      const user = await User.findOne({ userId: req.user.userId });
+      if (!user) {
+        return res.status(400).json({ errors: "User is not valid" });
+      }
 
       const rooms = await Room.find({ admins: userId })
         .sort({ likeAmount: -1 })
@@ -148,6 +154,11 @@ router.get(
       const userId = req.user.userId;
       const amount = req.query.amount;
       const page = req.query.page;
+
+      const user = await User.findOne({ userId: req.user.userId });
+      if (!user) {
+        return res.status(400).json({ errors: "User is not valid" });
+      }
 
       const rooms = await Room.find({ favorites: userId })
         .sort({ likeAmount: -1 })
@@ -199,21 +210,26 @@ router.put(
   "/update/:roomId/user",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    const roomId = req.params.roomId;
-    const userId = req.user.userId;
-
-    // check if user is new to the room by user id
-    // new -> add to the database
     try {
+      const roomId = req.params.roomId;
+      const userId = req.user.userId;
+
+      const user = await User.findOne({ userId: req.user.userId });
+      if (!user) {
+        return res.status(400).json({ errors: "User is not valid" });
+      }
+
+      // check if user is new to the room by user id
+      // new -> add to the database
       const room = await Room.findOne({ roomId: roomId });
 
       if (!room) {
         return res.status(400).json({ errors: "Problem finding room" });
       }
 
-      const user = room.members.find((member) => member === userId);
+      const member = room.members.find((member) => member === userId);
 
-      if (!user) {
+      if (!member) {
         // no user in the room yet
         // add user to the database
 
@@ -242,6 +258,12 @@ router.get(
     try {
       const roomId = req.params.roomId;
       const userId = req.user.userId;
+
+      const user = await User.findOne({ userId: req.user.userId });
+      if (!user) {
+        return res.status(400).json({ errors: "User is not valid" });
+      }
+
       const room = await Room.findOne({ roomId: roomId });
 
       if (!room) {
@@ -265,12 +287,17 @@ router.put(
   "/update/:roomId/favorite",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    const roomId = req.params.roomId;
-    const userId = req.user.userId;
-
-    // check if user is new to the room by user id
-    // new -> add to the database
     try {
+      const roomId = req.params.roomId;
+      const userId = req.user.userId;
+
+      const user = await User.findOne({ userId: req.user.userId });
+      if (!user) {
+        return res.status(400).json({ errors: "User is not valid" });
+      }
+
+      // check if user is new to the room by user id
+      // new -> add to the database
       const room = await Room.findOne({ roomId: roomId });
 
       if (!room) {
@@ -312,6 +339,11 @@ router.put(
       const roomId = req.params.roomId;
       const newAdminId = req.body.userId;
 
+      const user = await User.findOne({ userId: req.user.userId });
+      if (!user) {
+        return res.status(400).json({ errors: "User is not valid" });
+      }
+
       const room = await Room.findOne({ roomId: roomId });
 
       if (!room) {
@@ -319,8 +351,8 @@ router.put(
       }
 
       // check if new admin id exists
-      const user = await User.findOne({ userId: newAdminId });
-      if (!user) {
+      const newAdmin = await User.findOne({ userId: newAdminId });
+      if (!newAdmin) {
         return res.status(400).json({ errors: "User id does not exist" });
       }
 
@@ -369,6 +401,11 @@ router.put(
       const roomId = req.params.roomId;
       const newMemberId = req.body.userId;
 
+      const user = await User.findOne({ userId: req.user.userId });
+      if (!user) {
+        return res.status(400).json({ errors: "User is not valid" });
+      }
+
       const room = await Room.findOne({ roomId: roomId });
 
       if (!room) {
@@ -376,8 +413,8 @@ router.put(
       }
 
       // check if new member id exists
-      const user = await User.findOne({ userId: newMemberId });
-      if (!user) {
+      const newMember = await User.findOne({ userId: newMemberId });
+      if (!newMember) {
         return res.status(400).json({ errors: "User id does not exist" });
       }
 
