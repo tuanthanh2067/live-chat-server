@@ -447,6 +447,44 @@ router.put(
   }
 );
 
+router.delete(
+  "/:roomId",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const roomId = req.params.roomId;
+
+      const user = await User.findOne({ userId: req.user.userId });
+      if (!user) {
+        return res.status(400).json({ errors: "User is not valid" });
+      }
+
+      const room = await Room.findOne({ roomId: roomId });
+
+      if (!room) {
+        return res.status(400).json({ errors: "Can not find the room" });
+      }
+
+      if (room.creator !== userId) {
+        // not a creator of this room
+        // not allowed to delete
+        return res
+          .status(400)
+          .json({ errors: "You're not authorized to delete this room" });
+      }
+
+      await Room.deleteOne({ roomId: roomId });
+      return res.status(200).json({ messages: "Delete successfully" });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(404)
+        .json({ errors: "Error detected, please try again" });
+    }
+  }
+);
+
 router.use(errors());
 
 module.exports = router;
