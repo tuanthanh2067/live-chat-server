@@ -41,7 +41,7 @@ const singleUpload = upload.single("image");
 const singleUploadCtrl = (req, res, next) => {
   singleUpload(req, res, (error) => {
     if (error) {
-      return res.status(422).send({ message: "Image upload fail!" });
+      return res.status(422).send({ errors: "Image upload fail!" });
     }
     next();
   });
@@ -66,7 +66,9 @@ router.get(
       });
     } catch (err) {
       console.log(err);
-      return res.status(500).json({ error: err.code });
+      return res
+        .status(404)
+        .json({ errors: "An error has been detected, please try again" });
     }
   }
 );
@@ -130,7 +132,9 @@ router.post(
       );
       return res.status(200).json({ messages: "Upload successfully" });
     } catch (e) {
-      return res.status(422).send({ errors: e.message });
+      return res
+        .status(422)
+        .send({ errors: "An error has been detected, please try again" });
     }
   }
 );

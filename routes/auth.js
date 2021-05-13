@@ -39,7 +39,9 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ errors: "Invalid Credentials" });
     }
   } catch (err) {
-    return res.status(404).json({ errors: err.message });
+    return res
+      .status(404)
+      .json({ errors: "An error has been detected, please try again" });
   }
 });
 
@@ -103,11 +105,13 @@ router.post(
       await newUser.save();
 
       return res.status(200).json({
-        message: "Sign up successfully",
+        messages: "Sign up successfully",
       });
     } catch (err) {
       console.log(err);
-      return res.status(404).json({ errors: err.message });
+      return res
+        .status(404)
+        .json({ errors: "An error has been detected, please try again" });
     }
   }
 );
