@@ -9,6 +9,7 @@ const User = require("./models/User");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 const roomRoutes = require("./routes/rooms");
+const notificationRoutes = require("./routes/notifications");
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ passport.use(
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/rooms", roomRoutes);
+app.use("/notifications", notificationRoutes);
 
 app.get("/", (req, res) => {
   res.send("Api server's working");
