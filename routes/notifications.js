@@ -6,6 +6,12 @@ const { celebrate, Joi, Segments, errors } = require("celebrate");
 const Notification = require("../models/Notification");
 const User = require("../models/User");
 
+const {
+  formatBufferTo64,
+  cloudinaryUpload,
+  singleUploadCtrl,
+} = require("../helper/imageUpload");
+
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -33,7 +39,7 @@ router.post(
   "/add",
   passport.authenticate("jwt", { session: false }),
   celebrate({
-    [Segments.BODY]: Joi.object().keys({
+    [Segments.QUERY]: Joi.object().keys({
       title: Joi.string().required().messages({
         "string.base": "Title should be a string",
         "string.empty": "Title could not be empty",
@@ -51,8 +57,13 @@ router.post(
       }),
     }),
   }),
+  singleUploadCtrl,
   async (req, res) => {
     try {
+      const title = req.query.title;
+      const description = req.query.description;
+      const detail = req.query.detail;
+
       const userId = req.user.userId;
       const user = await User.findOne({ userId: userId });
 
@@ -66,21 +77,36 @@ router.post(
           .json({ errors: "You're not authorized to add a notification" });
       }
 
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ errors: "Can not upload the image, please try again" });
+      }
+
+      const file64 = formatBufferTo64(req.file);
+
+      const uploadResult = await cloudinaryUpload(file64.content);
+
       const newNotification = new Notification({
         notificationId: uniqid(),
-        title: req.body.title,
-        description: req.body.description,
-        detail: req.body.detail,
+        title: title,
+        description: description,
+        detail: detail,
+        image: uploadResult.secure_url,
       });
 
       await newNotification.save();
 
-      return res.status(200).json(newNotification);
+      return res
+        .status(200)
+        .json({ messages: "A new notification added successfully" });
     } catch (err) {
       console.log(err);
       return res.status(404).json({ errors: "Problem adding notification" });
     }
   }
 );
+
+router.use(errors());
 
 module.exports = router;
