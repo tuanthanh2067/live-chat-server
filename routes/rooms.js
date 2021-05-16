@@ -330,6 +330,8 @@ router.put(
   }
 );
 
+// add admin to room
+// only room creator can add admin
 router.put(
   "/update/:roomId/admin",
   passport.authenticate("jwt", { session: false }),
@@ -348,6 +350,13 @@ router.put(
 
       if (!room) {
         return res.status(400).json({ errors: "Can not find the room" });
+      }
+
+      if (room.creator !== userId) {
+        // this person is not the creator of this room
+        return res
+          .status(400)
+          .json({ errors: "You're not authorized to add admins" });
       }
 
       // check if new admin id exists
@@ -392,6 +401,8 @@ router.put(
   }
 );
 
+// add members to room
+// admin or room creator can add members
 router.put(
   "/update/:roomId/member",
   passport.authenticate("jwt", { session: false }),
@@ -423,9 +434,9 @@ router.put(
         return res.status(400).json({ errors: "Already a member" });
       }
 
-      if (room.admins.includes(userId)) {
-        // this person is an admin
-        // so they can add admins or members
+      if (room.admins.includes(userId) || room.creator === userId) {
+        // this person is an admin or room creator
+        // so they can add members
         await Room.updateOne(
           { roomId: roomId },
           { $push: { members: newMemberId } }
