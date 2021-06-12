@@ -37,6 +37,11 @@ router.post(
         "any.required": "Visibility is a required field",
         "string.valid": "Visibility has invalid option",
       }),
+      password: Joi.string().required().messages({
+        "string.base": "Password should be a string",
+        "string.empty": "Password could not be empty",
+        "any.required": "Password is a required field",
+      }),
     }),
   }),
   async (req, res) => {
@@ -54,6 +59,7 @@ router.post(
         description: req.body.description,
         maxNumbers: req.body.max,
         visibility: req.body.visibility,
+        password: req.body.password,
         admins: [user.userId],
         members: [user.userId],
         creator: user.userId,

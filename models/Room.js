@@ -42,6 +42,9 @@ const roomSchema = new mongoose.Schema({
   image: {
     type: String,
   },
+  password: {
+    type: String,
+  },
 });
 
 const Room = mongoose.model("Rooms", roomSchema);
