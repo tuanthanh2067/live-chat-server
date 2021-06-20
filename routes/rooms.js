@@ -194,7 +194,21 @@ router.get("/:id", async (req, res) => {
       return res.status(400).json({ errors: `Can not find the room id ${id}` });
     }
 
-    return res.status(200).json(room);
+    return res.status(200).json({
+      maxNumbers: room.maxNumbers,
+      admins: room.admins,
+      members: room.members,
+      favorites: room.favorites,
+      likeAmount: room.likeAmount,
+      dateCreated: room.dateCreated,
+      _id: room._id,
+      roomId: room.roomId,
+      roomName: room.roomName,
+      description: room.description,
+      visibility: room.visibility,
+      creator: room.creator,
+      image: room.image,
+    });
   } catch (err) {
     console.log(err);
     return res.status(404).json({ errors: "Problem getting the room" });
