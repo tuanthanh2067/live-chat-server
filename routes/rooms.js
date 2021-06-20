@@ -247,6 +247,10 @@ router.put(
         return res.status(400).json({ errors: "Problem finding room" });
       }
 
+      if (room.members.length >= room.maxNumbers) {
+        return res.status(400).json({ errors: "The room is full" });
+      }
+
       const member = room.members.find((member) => member === userId);
 
       if (!member) {
