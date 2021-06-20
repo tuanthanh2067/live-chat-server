@@ -516,6 +516,38 @@ router.delete(
   }
 );
 
+router.post(
+  "/:id/join",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const password = req.body.password;
+      const id = req.params.id;
+
+      if (!req.user) {
+        return res.status(400).json({ errors: "User is not valid" });
+      }
+
+      const room = await Room.findOne({ roomId: id });
+
+      if (room.visibility === "public") {
+        return res.status(200);
+      } else if (room.visibility === "private" && room.password === password) {
+        return res.status(200).json({ messages: "Join successfully" });
+      } else {
+        return res
+          .status(400)
+          .json({ errors: "Wrong password, please try again" });
+      }
+    } catch {
+      console.log(err);
+      return res
+        .status(404)
+        .json({ errors: "Error detected, please try again" });
+    }
+  }
+);
+
 router.use(errors());
 
 module.exports = router;
