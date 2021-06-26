@@ -394,8 +394,8 @@ router.put(
         return res.status(400).json({ errors: "Already an admin" });
       }
 
-      if (room.admins.includes(userId)) {
-        // this person is an admin
+      if (room.creator === userId) {
+        // this person is a creator
         // so they can add admins or members
         await Room.updateOne(
           { roomId: roomId },
