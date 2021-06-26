@@ -64,8 +64,7 @@ router.post(
       const description = req.query.description;
       const detail = req.query.detail;
 
-      const userId = req.user.userId;
-      const user = await User.findOne({ userId: userId });
+      const user = req.user;
 
       if (!user) {
         return res.status(400).json({ errors: "User is not valid" });

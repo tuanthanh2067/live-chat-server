@@ -47,7 +47,7 @@ router.post(
   async (req, res) => {
     try {
       // req.user
-      const user = await User.findOne({ userId: req.user.userId });
+      const user = req.user;
       if (!user) {
         return res.status(400).json({ errors: "User is not valid" });
       }
@@ -109,7 +109,7 @@ router.get(
       const amount = req.query.amount;
       const page = req.query.page;
 
-      const user = await User.findOne({ userId: req.user.userId });
+      const user = req.user;
       if (!user) {
         return res.status(400).json({ errors: "User is not valid" });
       }
@@ -161,7 +161,7 @@ router.get(
       const amount = req.query.amount;
       const page = req.query.page;
 
-      const user = await User.findOne({ userId: req.user.userId });
+      const user = req.user;
       if (!user) {
         return res.status(400).json({ errors: "User is not valid" });
       }
@@ -234,7 +234,7 @@ router.put(
       const roomId = req.params.roomId;
       const userId = req.user.userId;
 
-      const user = await User.findOne({ userId: req.user.userId });
+      const user = req.user;
       if (!user) {
         return res.status(400).json({ errors: "User is not valid" });
       }
@@ -283,7 +283,7 @@ router.get(
       const roomId = req.params.roomId;
       const userId = req.user.userId;
 
-      const user = await User.findOne({ userId: req.user.userId });
+      const user = req.user;
       if (!user) {
         return res.status(400).json({ errors: "User is not valid" });
       }
@@ -315,7 +315,7 @@ router.put(
       const roomId = req.params.roomId;
       const userId = req.user.userId;
 
-      const user = await User.findOne({ userId: req.user.userId });
+      const user = req.user;
       if (!user) {
         return res.status(400).json({ errors: "User is not valid" });
       }
@@ -365,7 +365,7 @@ router.put(
       const roomId = req.params.roomId;
       const newAdminId = req.body.userId;
 
-      const user = await User.findOne({ userId: req.user.userId });
+      const user = req.user;
       if (!user) {
         return res.status(400).json({ errors: "User is not valid" });
       }
@@ -432,11 +432,10 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
-      const userId = req.user.userId;
       const roomId = req.params.roomId;
       const newMemberId = req.body.userId;
 
-      const user = await User.findOne({ userId: req.user.userId });
+      const user = req.user;
       if (!user) {
         return res.status(400).json({ errors: "User is not valid" });
       }
@@ -490,7 +489,7 @@ router.delete(
       const userId = req.user.userId;
       const roomId = req.params.roomId;
 
-      const user = await User.findOne({ userId: req.user.userId });
+      const user = req.user;
       if (!user) {
         return res.status(400).json({ errors: "User is not valid" });
       }
